@@ -5,10 +5,29 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "shiga-native",
+            "name": "debug",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
+            "args": [
+                "--verbose",
+                "--no-sound-null-safety" // see also: https://dart.dev/null-safety/unsound-null-safety
+            ]
+        }, 
+        {
+            "name": "profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--no-sound-null-safety" // see also: https://dart.dev/null-safety/unsound-null-safety
+            ]
+        }, 
+        {
+            "name": "release",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
             "args": [
                 "--no-sound-null-safety" // see also: https://dart.dev/null-safety/unsound-null-safety
             ]

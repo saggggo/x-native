@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'pages/entry.dart';
 import 'pages/login.dart';
-import './pages/something_went_wrong.dart';
+import 'pages/error.dart';
 import 'api/firestore.dart';
 import 'components/loading.dart';
 
@@ -25,7 +24,8 @@ class FirebaseHandler extends StatelessWidget {
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return SomethingWentWrong();
+          print(snapshot.error);
+          return Error(snapshot.error.toString());
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
@@ -44,18 +44,19 @@ class LoginHandler extends StatefulWidget {
 }
 
 class _LoginHandlerState extends State<LoginHandler> {
-  User? fireUser;
+  User? fireAuthUser;
   bool loading = true;
 
   _LoginHandlerState() : super() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      // FirebaseAuth.instance.signOut();
       setLoading(false);
       setFireUser(user);
     });
   }
   void setFireUser(User? user) {
     setState(() {
-      fireUser = user;
+      fireAuthUser = user;
     });
   }
 
@@ -71,8 +72,8 @@ class _LoginHandlerState extends State<LoginHandler> {
       return Loading();
     }
 
-    if (fireUser != null) {
-      return UserInformation(fireUser!);
+    if (fireAuthUser != null) {
+      return UserInformation(fireAuthUser!);
     } else {
       return Login(
         loadingCallback: setLoading,
@@ -109,10 +110,9 @@ class _UserInformationState extends State<UserInformation> {
       stream: stream!,
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        print(snapshot);
         if (snapshot.hasError) {
-          print('Something went wrong');
-          return SomethingWentWrong();
+          print(snapshot.error);
+          return Error(snapshot.error.toString());
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -121,11 +121,15 @@ class _UserInformationState extends State<UserInformation> {
 
         if (snapshot.data == null) {
           print('snapshot.data is null');
-          return SomethingWentWrong();
+          return Error('snapshot.data is null');
         }
-        Map<String, dynamic> snapshotData =
-            snapshot.data?.data() as Map<String, dynamic>;
-        FireUser? fireuser = FireUser.fromJson(snapshotData);
+        Map<String, dynamic>? snapshotData =
+            snapshot.data?.data() as Map<String, dynamic>?;
+        if (snapshotData == null) {
+          print('snapshot.data.data is null');
+          return Error('snapshot.data.data is null');
+        }
+        FireUser? fireuser = FireUser.from(snapshotData);
         return Provider(create: (_) => fireuser, child: Entry());
       },
     );

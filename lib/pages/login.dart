@@ -39,15 +39,15 @@ class Login extends StatelessWidget {
                 child: Center(
                     child: CupertinoButton.filled(
                         child: Text(
-                          "Facebook Login",
+                          "Google Login",
                           textDirection: TextDirection.ltr,
                           style: TextStyle(fontFamily: 'Sniglet', fontSize: 25),
                         ),
                         onPressed: () {
                           loadingCallback(true);
-                          // signInWithFacebook().whenComplete(() {
-                          //   loadingCallback(false);
-                          // });
+                          signInWithGoogle().whenComplete(() {
+                            loadingCallback(false);
+                          });
                         }))),
           ],
         ));
@@ -71,15 +71,3 @@ Future<UserCredential> signInWithGoogle() async {
   // Once signed in, return the UserCredential
   return await FirebaseAuth.instance.signInWithCredential(credential);
 }
-
-// Future<UserCredential> signInWithFacebook() {
-//   // Trigger the sign-in flow
-//   return FacebookAuth.instance.login().then((result) {
-//     // Create a credential from the access token
-//     final facebookAuthCredential =
-//         FacebookAuthProvider.credential(result.token);
-
-//     // Once signed in, return the UserCredential
-//     return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-//   });
-// }

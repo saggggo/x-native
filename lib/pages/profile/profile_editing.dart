@@ -49,47 +49,12 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("profile screen");
     var user = context.read<FireUser>();
     var profilePromise = profileRef.doc(user.uid).get();
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        trailing: ProfilePageNavigationContents(
-            // editingStateChanged: (check) {
-            //   if (!check) {
-            //     if (editing) {
-            //       showCupertinoModalPopup<void>(
-            //         context: context,
-            //         builder: (BuildContext context) => CupertinoAlertDialog(
-            //           title: Text("変更を保存しますか？"),
-            //           // content: Text("メッセージ"),
-            //           actions: <Widget>[
-            //             CupertinoDialogAction(
-            //               child: Text("いいえ"),
-            //               isDestructiveAction: true,
-            //               onPressed: () {
-            //                 Navigator.pop(context);
-            //               },
-            //             ),
-            //             CupertinoDialogAction(
-            //               child: Text("はい"),
-            //               onPressed: () {
-            //                 setEditMode(check);
-            //                 Navigator.pop(context);
-            //               },
-            //             ),
-            //           ],
-            //         ),
-            //       );
-            //     } else {
-            //       setEditMode(check);
-            //     }
-            //   } else {
-            //     setEditMode(check);
-            //   }
-            // },
-            ),
+        trailing: ProfilePageNavigationContents(),
       ),
       child: SafeArea(
         maintainBottomViewPadding: true,
@@ -109,7 +74,7 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
             if (snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> data =
                   snapshot.data!.data() as Map<String, dynamic>;
-              FireUserProfile profile = FireUserProfile.fromJson(data);
+              FireUserProfile profile = FireUserProfile.from(data);
 
               return Form(
                   child: Column(
@@ -154,97 +119,6 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
                                       print(value);
                                     },
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("生年月日"),
-                                Text(profile.age?.toString() ?? "2000/05/03"),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("性別"),
-                                CupertinoButton(
-                                  padding: EdgeInsets.all(0),
-                                  child: Text(profile.gender ?? ""),
-                                  onPressed: () {
-                                    showCupertinoModalPopup<void>(
-                                      context: context,
-                                      builder: (context) {
-                                        return Container(
-                                          height: 150,
-                                          color: CupertinoColors.white,
-                                          child: CupertinoPicker(
-                                            children: [
-                                              Text("男"),
-                                              Text("女"),
-                                              Text("その他"),
-                                            ],
-                                            itemExtent: 40,
-                                            onSelectedItemChanged: (num) {},
-                                          ),
-                                        );
-                                      },
-                                      semanticsDismissible: true,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text("都市"),
-                                ),
-                                Expanded(
-                                  child: CupertinoTextField(
-                                    placeholder: profile.city,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("言語"),
-                                CupertinoButton(
-                                  padding: EdgeInsets.all(0),
-                                  child: Text(profile.language ?? ""),
-                                  onPressed: () {
-                                    showCupertinoModalPopup<void>(
-                                      context: context,
-                                      builder: (context) {
-                                        return Container(
-                                          height: 150,
-                                          color: CupertinoColors.white,
-                                          child: SafeArea(
-                                            child: CupertinoPicker(
-                                              children: [
-                                                Text("English"),
-                                                Text("日本語"),
-                                              ],
-                                              itemExtent: 40,
-                                              onSelectedItemChanged: (num) {},
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      semanticsDismissible: true,
-                                    );
-                                  },
                                 ),
                               ],
                             ),
