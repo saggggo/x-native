@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ionicons/ionicons.dart';
 import '../../api/firestore.dart';
 import '../../components/loading.dart';
 
@@ -11,13 +12,15 @@ class ProfilePageNavigationContents extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         CupertinoButton(
-          child: Icon(CupertinoIcons.scribble),
+          child:
+              Icon(Ionicons.pencil_outline, size: 22, color: Color(0xff999999)),
           onPressed: () {
             Navigator.pushNamed(context, '/editing');
           },
         ),
         CupertinoButton(
-          child: Icon(CupertinoIcons.gear),
+          child: Icon(Ionicons.settings_outline,
+              size: 22, color: Color(0xff999999)),
           onPressed: () {
             Navigator.pushNamed(context, '/settings');
           },
@@ -104,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    profile.displayName ?? "",
+                                    profile.displayName,
                                   ),
                                 ),
                               ],

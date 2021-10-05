@@ -22,6 +22,8 @@ dependencies:
   json_annotation: ^4.1.0
   provider: ^6.0.0
   settings_ui: ^1.0.0
+  qr_flutter: ^4.0.0
+  ionicons: ^0.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

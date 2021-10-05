@@ -1,17 +1,14 @@
 import 'package:flutter/cupertino.dart';
-import 'home.dart';
-import 'waiting.dart';
+import "./friends.dart";
+import "../error.dart";
 
-class HomeNavigator extends StatelessWidget {
+class FriendsRoutes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoTabView(routes: <String, WidgetBuilder>{
       "/": (BuildContext ctx) {
-        return HomePage();
+        return FriendsPage();
       },
-      "/waiting": (BuildContext ctx) {
-        return WaitingPage();
-      }
     });
   }
 }

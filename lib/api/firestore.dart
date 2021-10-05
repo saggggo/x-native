@@ -29,11 +29,11 @@ class FireUser {
 }
 
 class FireUserProfile {
-  final String? displayName;
+  final String displayName;
   final String? photoURL;
 
   FireUserProfile({
-    this.displayName,
+    required this.displayName,
     this.photoURL,
   });
 
