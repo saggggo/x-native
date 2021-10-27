@@ -51,12 +51,12 @@ class Frame extends StatelessWidget {
               label: "ホーム", icon: Icon(Ionicons.home_outline, size: 24)),
           BottomNavigationBarItem(
               label: "フレンド", icon: Icon(Ionicons.people_outline, size: 24)),
-          BottomNavigationBarItem(
-              label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
+          // BottomNavigationBarItem(
+          //     label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
           BottomNavigationBarItem(
               label: "ご近所", icon: Icon(Ionicons.location_outline, size: 24)),
           BottomNavigationBarItem(
-              label: "プロフ", icon: Icon(Ionicons.id_card_outline, size: 24))
+              label: "プロフィール", icon: Icon(Ionicons.id_card_outline, size: 24))
         ],
         iconSize: 25,
         currentIndex: 1,
