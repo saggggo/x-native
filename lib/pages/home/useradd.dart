@@ -50,6 +50,7 @@ class _UserAddPageState extends State<UserAddPage> {
 
   String searchId = "";
   bool tabLeft = true;
+  bool isQRScanMode = false;
 
   @override
   void reassemble() {
@@ -65,127 +66,160 @@ class _UserAddPageState extends State<UserAddPage> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(middle: Text("友達を追加")),
-      child: Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-          // QRWidget("qrstring"),
-          Container(
-            padding: EdgeInsets.fromLTRB(30, 110, 30, 30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CupertinoButton(
-                    child: Text(
-                      "QRで追加",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Color(tabLeft ? 0xFFFFFFFF : 0xFF999999)),
-                    ),
-                    onPressed: !tabLeft
-                        ? () {
-                            setState(() {
-                              tabLeft = !tabLeft;
-                            });
-                          }
-                        : null),
-                CupertinoButton(
-                    child: Text(
-                      "IDで追加",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(!tabLeft ? 0xFFFFFFFF : 0xFF999999),
-                      ),
-                    ),
-                    onPressed: tabLeft
-                        ? () {
-                            setState(() {
-                              tabLeft = !tabLeft;
-                            });
-                          }
-                        : null)
-              ],
-            ),
-          ),
-          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            // if (tabLeft)
-            //   Center(
-            //     child: Container(
-            //       height: 250,
-            //       width: 250,
-            //       child: QRView(
-            //         key: qrKey,
-            //         onQRViewCreated: _onQRViewCreated,
-            //       ),
-            //     ),
-            //   ),
-            if (tabLeft) QRWidget("xxfffdafd"),
-            if (tabLeft)
+      child: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
               Container(
-                width: 80.0,
-                height: 80.0,
-                decoration: BoxDecoration(
-                  color: Color(0xFF999999),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Ionicons.camera_sharp,
-                  size: 50,
-                  color: Color(0xFFFFFFFF),
-                ),
-              ),
-            if (!tabLeft)
-              Container(
-                padding: EdgeInsets.fromLTRB(30, 0, 30, 30),
-                child: CupertinoTextField(
-                  placeholder: 'IDを入力',
-                  onSubmitted: (text) {
-                    print(text);
-                    setState(() {
-                      searchId = text;
-                    });
-                  },
-                ),
-              ),
-            if (!tabLeft && searchId != "")
-              FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection("profile")
-                    .doc(searchId)
-                    .get(),
-                builder: (BuildContext ctx,
-                    AsyncSnapshot<DocumentSnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text("エラーが発生しました。しばらく経ってからやり直してください。",
-                        style: TextStyle(color: Color(0xFFFFFFFF)));
-                  } else if (snapshot.hasData && !snapshot.data!.exists) {
-                    return Text("ユーザーが存在しません",
-                        style: TextStyle(color: Color(0xFFFFFFFF)));
-                  } else if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return Loading();
-                  } else if (snapshot.connectionState == ConnectionState.done) {
-                    FireUserProfile profile = FireUserProfile.from(
-                        snapshot.data?.data() as Map<String, dynamic>);
-                    return Card(
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: profile.photoURL != null
-                                ? Image.network(profile.photoURL!)
-                                : Icon(Icons.album),
-                            title: Text(profile.displayName),
-                            subtitle: Text("自己紹介"),
-                            trailing: Icon(Ionicons.person_add_outline),
+                padding: EdgeInsets.fromLTRB(30, 40, 30, 30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CupertinoButton(
+                        child: Text(
+                          "QRで追加",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Color(tabLeft ? 0xFFFFFFFF : 0xFF999999)),
+                        ),
+                        onPressed: !tabLeft
+                            ? () {
+                                setState(() {
+                                  tabLeft = !tabLeft;
+                                });
+                              }
+                            : null),
+                    CupertinoButton(
+                        child: Text(
+                          "IDで追加",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(!tabLeft ? 0xFFFFFFFF : 0xFF999999),
                           ),
-                        ],
+                        ),
+                        onPressed: tabLeft
+                            ? () {
+                                setState(() {
+                                  tabLeft = !tabLeft;
+                                });
+                              }
+                            : null)
+                  ],
+                ),
+              ),
+              if (tabLeft)
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // if (tabLeft)
+                      //   Center(
+                      //     child: Container(
+                      //       height: 250,
+                      //       width: 250,
+                      //       child: QRView(
+                      //         key: qrKey,
+                      //         onQRViewCreated: _onQRViewCreated,
+                      //       ),
+                      //     ),
+                      //   ),
+                      if (isQRScanMode)
+                        Container(
+                          width: 100,
+                          height: 100,
+                          child: QRView(
+                            key: qrKey,
+                            onQRViewCreated: _onQRViewCreated,
+                          ),
+                        )
+                      else
+                        QRWidget("xxfffdafd"),
+                      OutlinedButton(
+                          child: Icon(
+                            Ionicons.camera_sharp,
+                            size: 50,
+                            color: Color(0xFFFFFFFF),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                              fixedSize: Size(80, 80),
+                              shape: CircleBorder(),
+                              backgroundColor: Color(0xFF666666)),
+                          onPressed: () {
+                            setState(() {
+                              isQRScanMode = !isQRScanMode;
+                            });
+                            print("pressed");
+                          }),
+                    ],
+                  ),
+                )
+              else
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.fromLTRB(30, 0, 30, 30),
+                        child: CupertinoTextField(
+                          placeholder: 'IDを入力',
+                          onSubmitted: (text) {
+                            print(text);
+                            setState(() {
+                              searchId = text;
+                            });
+                          },
+                        ),
                       ),
-                    );
-                  } else {
-                    return Loading();
-                  }
-                },
-              )
-          ])
-        ]),
+                      if (searchId != "")
+                        FutureBuilder<DocumentSnapshot>(
+                          future: FirebaseFirestore.instance
+                              .collection("profile")
+                              .doc(searchId)
+                              .get(),
+                          builder: (BuildContext ctx,
+                              AsyncSnapshot<DocumentSnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return Text("エラーが発生しました。しばらく経ってからやり直してください。",
+                                  style: TextStyle(color: Color(0xFFFFFFFF)));
+                            } else if (snapshot.hasData &&
+                                !snapshot.data!.exists) {
+                              return Text("ユーザーが存在しません",
+                                  style: TextStyle(color: Color(0xFFFFFFFF)));
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Loading();
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              FireUserProfile profile = FireUserProfile.from(
+                                  snapshot.data?.data()
+                                      as Map<String, dynamic>);
+                              return Card(
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      leading: profile.photoURL != null
+                                          ? Image.network(profile.photoURL!)
+                                          : Icon(Icons.album),
+                                      title: Text(profile.displayName),
+                                      subtitle: Text("自己紹介"),
+                                      trailing:
+                                          Icon(Ionicons.person_add_outline),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Loading();
+                            }
+                          },
+                        )
+                    ],
+                  ),
+                )
+            ],
+          ),
+        ),
       ),
     );
   }
