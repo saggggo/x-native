@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shiga_native/api/firestore.dart';
@@ -22,7 +23,7 @@ class QRWidget extends StatelessWidget {
               data: qrstring,
               version: QrVersions.auto,
               size: 200,
-              foregroundColor: Color(0xFFFFFFFF)),
+              foregroundColor: Theme.of(context).canvasColor),
           Text("ID: " + qrstring)
         ]));
   }
@@ -81,7 +82,10 @@ class _UserAddPageState extends State<UserAddPage> {
                           "QRで追加",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Color(tabLeft ? 0xFFFFFFFF : 0xFF999999)),
+                            color: tabLeft
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).unselectedWidgetColor,
+                          ),
                         ),
                         onPressed: !tabLeft
                             ? () {
@@ -95,7 +99,9 @@ class _UserAddPageState extends State<UserAddPage> {
                           "IDで追加",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(!tabLeft ? 0xFFFFFFFF : 0xFF999999),
+                            color: !tabLeft
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).unselectedWidgetColor,
                           ),
                         ),
                         onPressed: tabLeft
@@ -113,21 +119,10 @@ class _UserAddPageState extends State<UserAddPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // if (tabLeft)
-                      //   Center(
-                      //     child: Container(
-                      //       height: 250,
-                      //       width: 250,
-                      //       child: QRView(
-                      //         key: qrKey,
-                      //         onQRViewCreated: _onQRViewCreated,
-                      //       ),
-                      //     ),
-                      //   ),
                       if (isQRScanMode)
                         Container(
-                          width: 100,
-                          height: 100,
+                          width: 200,
+                          height: 200,
                           child: QRView(
                             key: qrKey,
                             onQRViewCreated: _onQRViewCreated,
@@ -145,11 +140,33 @@ class _UserAddPageState extends State<UserAddPage> {
                               fixedSize: Size(80, 80),
                               shape: CircleBorder(),
                               backgroundColor: Color(0xFF666666)),
-                          onPressed: () {
-                            setState(() {
-                              isQRScanMode = !isQRScanMode;
-                            });
-                            print("pressed");
+                          onPressed: () async {
+                            var p = await Permission.camera.request();
+                            print(p);
+                            if (p.isGranted) {
+                              setState(() {
+                                isQRScanMode = !isQRScanMode;
+                              });
+                            } else if (p.isPermanentlyDenied) {
+                              showCupertinoDialog(
+                                  context: context,
+                                  builder: (BuildContext ctx) {
+                                    return CupertinoAlertDialog(
+                                        // title: Text(),
+                                        content:
+                                            Text("設定画面にてカメラのアクセスを許可してください"),
+                                        actions: <Widget>[
+                                          CupertinoDialogAction(
+                                            child: Text("OK"),
+                                            onPressed: () {
+                                              openAppSettings();
+                                              return Navigator.of(ctx).pop();
+                                            },
+                                            isDefaultAction: true,
+                                          )
+                                        ]);
+                                  });
+                            }
                           }),
                     ],
                   ),

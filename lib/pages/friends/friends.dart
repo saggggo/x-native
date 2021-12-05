@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FriendsPageNavigationContents extends StatelessWidget {
   @override
@@ -18,21 +19,16 @@ class FriendsPageNavigationContents extends StatelessWidget {
 class FriendsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Permission.location.status.then((p) {
+      print(p);
+    });
     return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           trailing: FriendsPageNavigationContents(),
         ),
         child: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            CupertinoButton(
-              child: Text('Press!!'),
-              onPressed: () async {},
-            ),
-            CupertinoButton(
-              child: Text('Test'),
-              onPressed: () {},
-            ),
-          ]),
+          child:
+              Column(mainAxisAlignment: MainAxisAlignment.center, children: []),
         ));
   }
 }
