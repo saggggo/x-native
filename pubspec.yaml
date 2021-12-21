@@ -26,6 +26,8 @@ dependencies:
   ionicons: ^0.1.2
   qr_code_scanner: ^0.6.0
   mapbox_gl: ^0.14.0
+  geohashlib:
+    path: ../geohashlib
 dev_dependencies:
   flutter_test:
     sdk: flutter
