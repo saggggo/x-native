@@ -1,5 +1,5 @@
+import 'dart:developer';
 import 'dart:math';
-
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
@@ -27,6 +27,8 @@ class Spot {
 
 final _firestore = FirebaseFirestore.instance;
 
+typedef SymbolId = String;
+
 class _NearbyPageState extends State<NearbyPage> {
   bool tf = false;
   bool current = false;
@@ -36,6 +38,7 @@ class _NearbyPageState extends State<NearbyPage> {
   UserLocation? lastLocation;
   MapboxMapController? mController;
   MyLocationTrackingMode _myLocationTrackingMode = MyLocationTrackingMode.None;
+  Map<SymbolId, dynamic> MapViewSymbolInfo = {};
   Circle? userCircle;
 
   void renderer() {
@@ -64,8 +67,8 @@ class _NearbyPageState extends State<NearbyPage> {
     });
     final ByteData bytes =
         await rootBundle.load("assets/img/location-outline.png");
-    final Uint8List list = bytes.buffer.asUint8List();
-    await mController?.addImage("spot", list);
+    final Uint8List imagebinary = bytes.buffer.asUint8List();
+    await mController?.addImage("spot", imagebinary);
     if (didStyleLoaded) {
       renderer();
     }
@@ -202,14 +205,13 @@ class _NearbyPageState extends State<NearbyPage> {
                             ),
                           ]),
                       child: CupertinoButton(
-                        child: Align(
-                          child: Icon(
-                            CupertinoIcons.checkmark,
-                            color: Color(0xFF000000),
+                          child: Align(
+                            child: Icon(
+                              CupertinoIcons.checkmark,
+                              color: Color(0xFF000000),
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          if (lastLocation != null) {
+                          onPressed: () {
                             var areas = geohashQueryBounds(
                                 geoPointForDouble(
                                     lastLocation!.position.latitude,
@@ -233,14 +235,16 @@ class _NearbyPageState extends State<NearbyPage> {
                                                   .position.longitude));
                                       print(dist);
                                       if (500 > dist) {
-                                        var opt = SymbolOptions.defaultOptions;
-                                        print(opt.iconSize);
-                                        mController?.addSymbol(opt.copyWith(
-                                            SymbolOptions(
-                                                iconImage: 'spot',
-                                                iconSize: .08,
-                                                geometry:
-                                                    LatLng(sp.lat, sp.lon))));
+                                        mController?.addSymbol(SymbolOptions(
+                                          draggable: false,
+                                          iconAnchor: "center",
+                                          iconHaloColor: "rgba(ff,ff,ff,ff)",
+                                          iconImage: "spot",
+                                          iconColor: "#FFFFFF",
+                                          iconSize: .7,
+                                          iconHaloWidth: 10,
+                                          geometry: LatLng(sp.lat, sp.lon),
+                                        ));
                                         print("lon: " +
                                             sp.lon.toString() +
                                             " lat: " +
@@ -250,9 +254,7 @@ class _NearbyPageState extends State<NearbyPage> {
                                     }
                                   });
                             });
-                          }
-                        },
-                      ),
+                          }),
                     ),
                   ),
                 ),
