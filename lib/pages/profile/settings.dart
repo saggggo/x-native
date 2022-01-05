@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:settings_ui/settings_ui.dart';
+import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import '../../api/firestore.dart';
 
 class SettingsPage extends StatelessWidget {
