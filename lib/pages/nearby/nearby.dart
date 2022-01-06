@@ -1,10 +1,10 @@
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:math';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,33 +12,22 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:geohashlib/geohashlib.dart';
 import '../../components/loading.dart';
-import '../../components/toolbar.dart';
-// Init firestore and geoFlutterFire
-
-class Spot {
-  final GeoHash geohash;
-  final Latitude lat;
-  final Longitude lon;
-  final Timestamp timestamp;
-
-  Spot(this.geohash, this.lat, this.lon, this.timestamp);
-  static Spot fromMap(Map<String, dynamic> obj) {
-    return new Spot(obj["geohash"], obj["lat"], obj["lng"], obj["timestamp"]);
-  }
-}
+import '../../utils/types.dart';
+import './_sliding_up.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
-typedef SymbolId = String;
-
 class _NearbyPageState extends State<NearbyPage> {
+  final GlobalKey<SlidingUpState> _slidingUpStateKey = GlobalKey();
+
   bool tf = false;
   bool current = false;
   bool loop = true;
   bool didMapCreated = false;
   bool didStyleLoaded = false;
   UserLocation? lastLocation;
-  PanelController pController = PanelController();
+  // PanelController pController = PanelController();
+  Spot? spotFocused;
   late MapboxMapController mController;
   MyLocationTrackingMode _myLocationTrackingMode = MyLocationTrackingMode.None;
   Circle? userCircle;
@@ -60,10 +49,15 @@ class _NearbyPageState extends State<NearbyPage> {
     }
   }
 
-  void _addMarker(String key, Point<double> point, LatLng coordinate) {
+  void _addMarker(Spot sp, Point<double> point) {
+    for (var i = 0; i < _markers.length; i++) {
+      if (_markers[i].key == Key(sp.geohash)) {
+        return;
+      }
+    }
     setState(() {
-      _markers.add(Marker(
-          key, point, coordinate, this._addMarkerStates, this._onMarkerTapped));
+      _markers
+          .add(Marker(sp, point, this._addMarkerStates, this._onMarkerTapped));
     });
   }
 
@@ -71,9 +65,12 @@ class _NearbyPageState extends State<NearbyPage> {
     _markerStates.add(markerState);
   }
 
-  void _onMarkerTapped() {
-    print("_onMarkerTapped");
-    this.pController.open();
+  void _onMarkerTapped(Spot sp) {
+    print("_onMarkerTapped: " + sp.name);
+    setState(() {
+      this.spotFocused = sp;
+      this._slidingUpStateKey.currentState!.halfOpen();
+    });
   }
 
   void _updateMarkerPosition() {
@@ -124,6 +121,9 @@ class _NearbyPageState extends State<NearbyPage> {
 
   void _onMapClick(Point<double> p, LatLng lg) {
     print("map clicked: " + p.toString() + "," + lg.toString());
+    setState(() {
+      spotFocused = null;
+    });
   }
 
   void _onUserLocationUpdated(UserLocation location) {
@@ -228,16 +228,6 @@ class _NearbyPageState extends State<NearbyPage> {
                 Stack(
                   children: _markers,
                 ),
-                SlidingUpPanel(
-                    panel: SlidingUpContents(),
-                    backdropEnabled: true,
-                    backdropTapClosesPanel: true,
-                    minHeight: 0,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                    controller: pController),
                 SafeArea(
                   child: Container(
                     alignment: Alignment.topCenter,
@@ -300,8 +290,7 @@ class _NearbyPageState extends State<NearbyPage> {
                                         Point<double> p = Point<double>(
                                             value[i].x as double,
                                             value[i].y as double);
-                                        _addMarker(spots[i].geohash, p,
-                                            LatLng(spots[i].lat, spots[i].lon));
+                                        _addMarker(spots[i], p);
                                       }
                                     });
                                   });
@@ -310,6 +299,8 @@ class _NearbyPageState extends State<NearbyPage> {
                     ),
                   ),
                 ),
+                if (spotFocused != null)
+                  SlidingUp(key: _slidingUpStateKey, spot: this.spotFocused!)
               ],
             ),
           ),
@@ -325,17 +316,20 @@ class NearbyPage extends StatefulWidget {
 }
 
 class Marker extends StatefulWidget {
+  final Spot spot;
   final Point initialPosition;
-  final LatLng coordinate;
-  GestureTapCallback tapHandler;
+  final void Function(Spot) tapHandler;
   final void Function(_MarkerState) _addMarkerState;
 
-  Marker(String key, this.initialPosition, this.coordinate,
-      this._addMarkerState, this.tapHandler)
-      : super(key: Key(key));
+  Marker(this.spot, this.initialPosition, this._addMarkerState, this.tapHandler)
+      : super(key: Key(spot.geohash));
+
+  LatLng get coordinate => LatLng(this.spot.lat, this.spot.lon);
 
   State<StatefulWidget> createState() {
-    final s = _MarkerState(this.initialPosition, this.tapHandler);
+    final s = _MarkerState(this.initialPosition, () {
+      this.tapHandler(this.spot);
+    });
     _addMarkerState(s);
     return s;
   }
@@ -371,310 +365,5 @@ class _MarkerState extends State {
                 height: _iconSize,
               )),
         ));
-  }
-}
-
-class UserIconCircle extends StatelessWidget {
-  Widget? child;
-  final double size;
-  final EdgeInsets? margin;
-  UserIconCircle(
-      {this.child,
-      this.size = 60,
-      this.margin = const EdgeInsets.fromLTRB(5, 0, 5, 0)});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      margin: margin,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.blue,
-        ),
-        borderRadius: BorderRadius.circular(100.0),
-      ),
-      child: Center(child: this.child),
-    );
-  }
-}
-
-class SlidingUpContents extends StatelessWidget {
-  @override
-  Widget build(BuildContext ctx) {
-    return Column(
-      children: [
-        Container(
-          height: 20,
-          child: Center(
-            child: Container(
-              width: 200,
-              height: 5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: Color(0xFFBBBBBB),
-              ),
-            ),
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.all(5),
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.only(top: 5, bottom: 10),
-                child: Text(
-                  "亀沢3丁目",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color(0xFF000000)),
-                ),
-              ),
-              Container(
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.only(left: 30),
-                            child: Text(
-                              "トーク",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF000000)),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(right: 30),
-                            child: Text(
-                              "新しく開始",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Color(0xFFaaaaaa)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: 80,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Column(children: [
-                              UserIconCircle(
-                                child: Text(
-                                  "hoge",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "お話ししませんか",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF000000),
-                                ),
-                              ),
-                            ]),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Column(children: [
-                              UserIconCircle(
-                                child: Text(
-                                  "hoge",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "最近引っ越して...",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF000000),
-                                ),
-                              ),
-                            ]),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Column(children: [
-                              UserIconCircle(
-                                child: Text(
-                                  "hoge",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "こんにちは",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF000000),
-                                ),
-                              ),
-                            ]),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Column(children: [
-                              UserIconCircle(
-                                child: Text(
-                                  "hoge",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "周辺のご飯屋さん",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF000000),
-                                ),
-                              ),
-                            ]),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                UserIconCircle(
-                                  child: Text(
-                                    "hoge",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF000000),
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  "もっと見る",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 20, bottom: 10),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: Color(0xFFEEEEEE)),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.only(left: 30),
-                            child: Text(
-                              "掲示板",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF000000)),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(right: 30),
-                            child: Text(
-                              "新しく開始",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Color(0xFFaaaaaa)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.all(10),
-                      height: 30,
-                      child: Row(
-                        children: [
-                          Text("周辺のご飯屋さん情報",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF000000))),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.all(10),
-                      height: 30,
-                      child: Row(
-                        children: [
-                          Text("周辺のご飯屋さん情報",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF000000))),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.all(10),
-                      height: 30,
-                      child: Row(
-                        children: [
-                          Text("周辺のご飯屋さん情報",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF000000))),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
