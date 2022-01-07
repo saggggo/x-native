@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../utils/types.dart';
 
-Widget SafeAreaWrap({required Widget child, required bool wrap}) {
+Widget _SafeAreaWrap({required Widget child, required bool wrap}) {
   return (wrap) ? SafeArea(child: child) : child;
 }
 
@@ -26,10 +26,21 @@ class SlidingUpState extends State<SlidingUp> {
     controller.panelPosition = 0.1;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!
+          .addPostFrameCallback((_) => halfOpen()); // build の後に呼び出される
+    }
+  }
+
+  @override
   Widget build(BuildContext ctx) {
     Spot spot = widget.spot;
     return SlidingUpPanel(
-      defaultPanelState: PanelState.OPEN,
+      color: Color(0xFF000000),
+      defaultPanelState: PanelState.CLOSED,
       backdropEnabled: true,
       backdropTapClosesPanel: true,
       maxHeight: MediaQuery.of(context).size.height,
@@ -69,7 +80,7 @@ class SlidingUpState extends State<SlidingUp> {
                 ),
               ),
             ),
-          SafeAreaWrap(
+          _SafeAreaWrap(
             wrap: isPanelOpened,
             child: Container(
               margin: EdgeInsets.all(5),
@@ -82,7 +93,7 @@ class SlidingUpState extends State<SlidingUp> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
-                          color: Color(0xFF000000)),
+                          color: Color(0xFFFFFFFF)),
                     ),
                   ),
                   Container(
@@ -100,13 +111,16 @@ class SlidingUpState extends State<SlidingUp> {
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Color(0xFF000000)),
+                                      color: Color(0xFFFFFFFF)),
                                 ),
                               ),
                               Container(
                                 padding: EdgeInsets.only(right: 30),
                                 child: TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, '/voiceChat/create');
+                                  },
                                   child: Text(
                                     "新しく開始",
                                     style: TextStyle(
@@ -134,7 +148,7 @@ class SlidingUpState extends State<SlidingUp> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFF000000),
+                                          color: Color(0xFFFFFFFF),
                                         ),
                                       ),
                                     ),
@@ -143,7 +157,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ]),
@@ -158,7 +172,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
@@ -167,7 +181,7 @@ class SlidingUpState extends State<SlidingUp> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF000000),
+                                      color: Color(0xFFFFFFFF),
                                     ),
                                   ),
                                 ]),
@@ -181,7 +195,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
@@ -190,7 +204,7 @@ class SlidingUpState extends State<SlidingUp> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF000000),
+                                      color: Color(0xFFFFFFFF),
                                     ),
                                   ),
                                 ]),
@@ -204,7 +218,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
@@ -213,7 +227,7 @@ class SlidingUpState extends State<SlidingUp> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF000000),
+                                      color: Color(0xFFFFFFFF),
                                     ),
                                   ),
                                 ]),
@@ -227,7 +241,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
@@ -236,7 +250,7 @@ class SlidingUpState extends State<SlidingUp> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF000000),
+                                      color: Color(0xFFFFFFFF),
                                     ),
                                   ),
                                 ]),
@@ -252,7 +266,7 @@ class SlidingUpState extends State<SlidingUp> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFF000000),
+                                          color: Color(0xFFFFFFFF),
                                         ),
                                       ),
                                     ),
@@ -261,7 +275,7 @@ class SlidingUpState extends State<SlidingUp> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF000000),
+                                        color: Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ],
@@ -294,7 +308,7 @@ class SlidingUpState extends State<SlidingUp> {
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Color(0xFF000000)),
+                                      color: Color(0xFFFFFFFF)),
                                 ),
                               ),
                               Container(
@@ -322,7 +336,7 @@ class SlidingUpState extends State<SlidingUp> {
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Color(0xFF000000))),
+                                      color: Color(0xFFFFFFFF))),
                             ],
                           ),
                         ),
@@ -335,7 +349,7 @@ class SlidingUpState extends State<SlidingUp> {
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: Color(0xFF000000))),
+                                      color: Color(0xFFFFFFFF))),
                             ],
                           ),
                         ),
@@ -349,7 +363,7 @@ class SlidingUpState extends State<SlidingUp> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Color(0xFF000000)),
+                                    color: Color(0xFFFFFFFF)),
                               ),
                             ],
                           ),

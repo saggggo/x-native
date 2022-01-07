@@ -69,7 +69,9 @@ class _NearbyPageState extends State<NearbyPage> {
     print("_onMarkerTapped: " + sp.name);
     setState(() {
       this.spotFocused = sp;
-      this._slidingUpStateKey.currentState!.halfOpen();
+      if (this._slidingUpStateKey.currentState != null) {
+        this._slidingUpStateKey.currentState!.halfOpen();
+      }
     });
   }
 
