@@ -28,7 +28,7 @@ dependencies:
   mapbox_gl: ^0.14.0
   sliding_up_panel: ^2.0.0+1
   geohashlib:
-    path: ../geohashlib
+    path: ./packages/geohashlib
 dev_dependencies:
   flutter_test:
     sdk: flutter

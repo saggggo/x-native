@@ -341,7 +341,7 @@ packages:
   geohashlib:
     dependency: "direct main"
     description:
-      path: "../geohashlib"
+      path: "packages/geohashlib"
       relative: true
     source: path
     version: "2.0.0"

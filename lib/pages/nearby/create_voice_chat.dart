@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../api/firestore.dart';
 import '../../components/loading.dart';
-import "../../utils/types.dart";
 
 final _firestore = FirebaseFirestore.instance;
 
