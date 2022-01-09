@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import '../../utils/types.dart';
+import '../../api/firestore.dart';
 
 Widget _SafeAreaWrap({required Widget child, required bool wrap}) {
   return (wrap) ? SafeArea(child: child) : child;
@@ -119,7 +119,10 @@ class SlidingUpState extends State<SlidingUp> {
                                 child: TextButton(
                                   onPressed: () {
                                     Navigator.pushNamed(
-                                        context, '/voiceChat/create');
+                                      context,
+                                      '/voiceChat/create',
+                                      arguments: widget.spot,
+                                    );
                                   },
                                   child: Text(
                                     "新しく開始",

@@ -9,10 +9,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:geohashlib/geohashlib.dart';
-import '../../components/loading.dart';
-import '../../utils/types.dart';
+import '../../api/firestore.dart';
 import './_sliding_up.dart';
 
 final _firestore = FirebaseFirestore.instance;
@@ -272,7 +270,9 @@ class _NearbyPageState extends State<NearbyPage> {
                                   .then((res) {
                                     List<Spot> spots = [];
                                     for (var doc in res.docs) {
+                                      inspect(doc.data());
                                       var sp = Spot.fromMap(doc.data());
+                                      print(sp);
                                       var dist = distanceBetween(
                                           geoPointForDouble(sp.lat, sp.lon),
                                           geoPointForDouble(
