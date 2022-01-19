@@ -6,6 +6,7 @@ import 'nearby/routes.dart';
 import 'fullscreen/shiga_waiting.dart';
 import 'package:ionicons/ionicons.dart';
 import 'error.dart';
+import "./testpage.dart";
 
 class Entry extends StatelessWidget {
   @override
@@ -68,6 +69,7 @@ class Frame extends StatelessWidget {
       tabBuilder: (BuildContext context, int index) {
         if (index == 0) {
           return HomeRoutes();
+          // return TestPage();
         } else if (index == 1) {
           return FriendsRoutes();
         } else if (index == 2) {

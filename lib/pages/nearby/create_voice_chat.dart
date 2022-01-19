@@ -4,13 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../api/firestore.dart';
 import '../../components/loading.dart';
-
-final _firestore = FirebaseFirestore.instance;
-
-Timestamp now() {
-  var _now = DateTime.now().microsecondsSinceEpoch;
-  return Timestamp((_now / 1000000).floor(), _now % 1000000 * 1000);
-}
+import "../../utils/webrtc.dart";
 
 class CreateVoiceChatForm extends StatefulWidget {
   const CreateVoiceChatForm({Key? key}) : super(key: key);
@@ -61,8 +55,9 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                             margin: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 20),
                             child: CupertinoTextFormFieldRow(
-                              onFieldSubmitted: (value) {
+                              onChanged: (value) {
                                 setState(() {
+                                  print(value);
                                   title = value;
                                 });
                               },
@@ -117,34 +112,41 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                               setState(() {
                                 loading = true;
                               });
-                              _firestore
-                                  .collection("spots")
-                                  .doc(spot.geohash)
-                                  .collection("voiceChat")
-                                  .add({
+                              VoiceChat.create(spot.geohash, {
                                 "title": title,
                                 "owner": user.uid,
                                 "max": sliderValue,
+                                "members": FieldValue.arrayUnion([user.uid]),
                                 "createdAt": now(),
-                              }).then((value) {
-                                print(value);
-                                showCupertinoDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return CupertinoAlertDialog(
-                                      title: Text("エラー"),
-                                      content:
-                                          Text("不明なエラーが発生しました。再度やり直してください。"),
-                                      actions: [
-                                        CupertinoDialogAction(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text("Yes"))
-                                      ],
-                                    );
-                                  },
-                                );
+                              }).then((chatId) {
+                                setState(() {
+                                  loading = true;
+                                });
+                                var wClient = WebrtcClient(user.uid);
+                                wClient.enter(spot.geohash, chatId);
+                                VoiceChat.get(spot.geohash, chatId).then((vc) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                      '/voiceChat/detail',
+                                      arguments: vc);
+                                });
+
+                                // showCupertinoDialog(
+                                //   context: context,
+                                //   builder: (context) {
+                                // return CupertinoAlertDialog(
+                                //   title: Text("エラー"),
+                                //   content:
+                                //       Text("不明なエラーが発生しました。再度やり直してください。"),
+                                //   actions: [
+                                //     CupertinoDialogAction(
+                                //         onPressed: () {
+                                //           Navigator.of(context).pop();
+                                //         },
+                                //         child: Text("Yes"))
+                                //   ],
+                                // );
+                                // },
+                                // );
                               }, onError: (err) {
                                 print(err);
                                 showCupertinoDialog(

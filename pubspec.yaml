@@ -27,8 +27,11 @@ dependencies:
   qr_code_scanner: ^0.6.0
   mapbox_gl: ^0.14.0
   sliding_up_panel: ^2.0.0+1
+  webrtc_audio_background:
+    path: ./packages/webrtc_audio_background
   geohashlib:
     path: ./packages/geohashlib
+  flutter_webrtc: ^0.8.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

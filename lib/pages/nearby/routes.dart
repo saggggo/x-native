@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import "./nearby.dart";
 import "./create_voice_chat.dart";
+import "./detail_voice_chat.dart";
 
 class NearbyRoutes extends StatelessWidget {
   @override
@@ -11,6 +12,9 @@ class NearbyRoutes extends StatelessWidget {
       },
       "/voiceChat/create": (BuildContext ctx) {
         return CreateVoiceChatForm();
+      },
+      "/voiceChat/detail": (BuildContext ctx) {
+        return DetailVoiceChat();
       }
     });
   }

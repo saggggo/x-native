@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../api/firestore.dart';
+import "../../components/loading.dart";
 
 Widget _SafeAreaWrap({required Widget child, required bool wrap}) {
   return (wrap) ? SafeArea(child: child) : child;
@@ -138,153 +139,73 @@ class SlidingUpState extends State<SlidingUp> {
                         ),
                         Container(
                           height: 80,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              ...spot.voiceChat.map(
-                                (sp) => Container(
-                                  margin: EdgeInsets.only(left: 5, right: 5),
-                                  child: Column(children: [
-                                    UserIconCircle(
-                                      child: Text(
-                                        "hoge",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFFFFFFFF),
+                          child: FutureBuilder<List<VoiceChat>>(
+                            future: spot.listVoiceChat(),
+                            builder: (context, snapshot) {
+                              var vcs = snapshot.data;
+                              if (vcs != null) {
+                                return ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: [
+                                      ...vcs.map(
+                                        (vc) => Container(
+                                          margin: EdgeInsets.only(
+                                              left: 5, right: 5),
+                                          child: Column(children: [
+                                            UserIconCircle(
+                                              child: Text(
+                                                vc.members[0],
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFFFFFFFF),
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              vc.title,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFFFFFFFF),
+                                              ),
+                                            ),
+                                          ]),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      "お話ししませんか",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ]),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                child: Column(children: [
-                                  UserIconCircle(
-                                    child: Text(
-                                      "hoge",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    "お話ししませんか",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                child: Column(children: [
-                                  UserIconCircle(
-                                    child: Text(
-                                      "hoge",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    "最近引っ越して...",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                child: Column(children: [
-                                  UserIconCircle(
-                                    child: Text(
-                                      "hoge",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    "こんにちは",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                child: Column(children: [
-                                  UserIconCircle(
-                                    child: Text(
-                                      "hoge",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    "周辺のご飯屋さん",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ]),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    UserIconCircle(
-                                      child: Text(
-                                        "hoge",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFFFFFFFF),
+                                      Container(
+                                        margin:
+                                            EdgeInsets.only(left: 5, right: 5),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            UserIconCircle(
+                                              child: Text(
+                                                "hoge",
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFFFFFFFF),
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              "もっと見る",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFFFFFFFF),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ),
-                                    Text(
-                                      "もっと見る",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFFFFFF),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
+                                      )
+                                    ]);
+                              } else {
+                                return Loading();
+                              }
+                            },
                           ),
                         )
                       ],

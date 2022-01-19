@@ -7,13 +7,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:geohashlib/geohashlib.dart';
 import '../../api/firestore.dart';
 import './_sliding_up.dart';
-
-final _firestore = FirebaseFirestore.instance;
 
 class _NearbyPageState extends State<NearbyPage> {
   final GlobalKey<SlidingUpState> _slidingUpStateKey = GlobalKey();
@@ -261,41 +258,64 @@ class _NearbyPageState extends State<NearbyPage> {
                                     lastLocation!.position.longitude),
                                 500);
                             Future.forEach<Map<String, String>>(areas, (area) {
-                              return _firestore
-                                  .collection("spots")
-                                  .orderBy('geohash')
-                                  .startAt([area["start"]])
-                                  .endAt([area["end"]])
-                                  .get()
-                                  .then((res) {
-                                    List<Spot> spots = [];
-                                    for (var doc in res.docs) {
-                                      inspect(doc.data());
-                                      var sp = Spot.fromMap(doc.data());
-                                      print(sp);
-                                      var dist = distanceBetween(
-                                          geoPointForDouble(sp.lat, sp.lon),
-                                          geoPointForDouble(
-                                              lastLocation!.position.latitude,
-                                              lastLocation!
-                                                  .position.longitude));
-                                      print(dist);
-                                      if (500 > dist) {
-                                        spots.add(sp);
-                                      }
-                                    }
-                                    mController
-                                        .toScreenLocationBatch(spots.map(
-                                            (elm) => LatLng(elm.lat, elm.lon)))
-                                        .then((value) {
-                                      for (var i = 0; i < value.length; i++) {
-                                        Point<double> p = Point<double>(
-                                            value[i].x as double,
-                                            value[i].y as double);
-                                        _addMarker(spots[i], p);
-                                      }
-                                    });
-                                  });
+                              // return _firestore
+                              //     .collection("spots")
+                              //     .orderBy('geohash')
+                              //     .startAt([area["start"]])
+                              //     .endAt([area["end"]])
+                              //     .get()
+                              // .then((res) {
+                              //   List<Spot> spots = [];
+                              //   for (var doc in res.docs) {
+                              //     inspect(doc.data());
+                              //     var sp = Spot.fromMap(doc.data());
+                              //     print(sp);
+                              //     var dist = distanceBetween(
+                              //         geoPointForDouble(sp.lat, sp.lon),
+                              //         geoPointForDouble(
+                              //             lastLocation!.position.latitude,
+                              //             lastLocation!
+                              //                 .position.longitude));
+                              //     print(dist);
+                              //     if (500 > dist) {
+                              //       spots.add(sp);
+                              //     }
+                              //   }
+                              //   mController
+                              //       .toScreenLocationBatch(spots.map(
+                              //           (elm) => LatLng(elm.lat, elm.lon)))
+                              //       .then((value) {
+                              //     for (var i = 0; i < value.length; i++) {
+                              //       Point<double> p = Point<double>(
+                              //           value[i].x as double,
+                              //           value[i].y as double);
+                              //       _addMarker(spots[i], p);
+                              //     }
+                              //   });
+                              // });
+                              return Spot.search(area["start"]!, area["end"]!)
+                                  .then((spots) {
+                                var filtered = spots.where((sp) {
+                                  print(sp);
+                                  var dist = distanceBetween(
+                                      geoPointForDouble(sp.lat, sp.lon),
+                                      geoPointForDouble(
+                                          lastLocation!.position.latitude,
+                                          lastLocation!.position.longitude));
+                                  return 500 > dist;
+                                }).toList();
+                                mController
+                                    .toScreenLocationBatch(filtered
+                                        .map((elm) => LatLng(elm.lat, elm.lon)))
+                                    .then((value) {
+                                  for (var i = 0; i < value.length; i++) {
+                                    Point<double> p = Point<double>(
+                                        value[i].x as double,
+                                        value[i].y as double);
+                                    _addMarker(filtered[i], p);
+                                  }
+                                });
+                              });
                             });
                           }),
                     ),

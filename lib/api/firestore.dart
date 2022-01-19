@@ -1,5 +1,13 @@
+import "dart:developer";
 import 'package:geohashlib/geohashlib.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+final _firestore = FirebaseFirestore.instance;
+
+Timestamp now() {
+  var _now = DateTime.now().microsecondsSinceEpoch;
+  return Timestamp((_now / 1000000).floor(), _now % 1000000 * 1000);
+}
 
 class FireUser {
   final String uid;
@@ -43,15 +51,8 @@ class FireUserProfile {
         this.photoURL = obj["photoURL"];
 }
 
-class VoiceChat {
-  VoiceChat();
-}
-
-class TextChat {
-  TextChat();
-}
-
 class Spot {
+  static String keyName = "spots";
   final GeoHash geohash;
   final Latitude lat;
   final Longitude lon;
@@ -61,32 +62,199 @@ class Spot {
   final String locationName3;
   final String locationNameHurigana;
   final Timestamp timestamp;
-  final List<VoiceChat> voiceChat;
-  final List<TextChat> textChat;
 
-  Spot(
-      this.geohash,
-      this.lat,
-      this.lon,
-      this.timestamp,
-      this.name,
-      this.locationName1,
-      this.locationName2,
-      this.locationName3,
-      this.locationNameHurigana,
-      {this.voiceChat = const [],
-      this.textChat = const []});
-  static Spot fromMap(Map<String, dynamic> obj) {
-    return new Spot(
-      obj["geohash"],
-      obj["lat"],
-      obj["lng"],
-      obj["timestamp"],
-      obj["name"],
-      obj["locationName1"],
-      obj["locationName2"],
-      obj["locationName3"],
-      obj["locationNameHurigana"],
-    );
+  // Spot({
+  //   required this.geohash,
+  //   required this.lat,
+  //   required this.lon,
+  //   required this.timestamp,
+  //   required this.name,
+  //   required this.locationName1,
+  //   required this.locationName2,
+  //   required this.locationName3,
+  //   required this.locationNameHurigana,
+  // });
+
+  Spot.from(Map<String, dynamic> obj)
+      : this.geohash = obj["geohash"],
+        this.lat = obj["lat"],
+        this.lon = obj["lng"],
+        this.timestamp = obj["timestamp"],
+        this.name = obj["name"],
+        this.locationName1 = obj["locationName1"],
+        this.locationName2 = obj["locationName2"],
+        this.locationName3 = obj["locationName3"],
+        this.locationNameHurigana = obj["locationNameHurigana"];
+
+  static Future<Spot> get(String geohash) {
+    return _firestore.collection(keyName).doc(geohash).get().then((doc) {
+      var data = doc.data();
+      if (data != null) {
+        try {
+          return Spot.from(data);
+        } catch (e) {
+          print(e);
+          return Future.error(e);
+        }
+      } else {
+        return Future.error("data is null");
+      }
+    });
+  }
+
+  static Future<List<Spot>> search(GeoHash start, GeoHash end) {
+    return _firestore
+        .collection(keyName)
+        .orderBy("geohash")
+        .startAt([start])
+        .endAt([end])
+        .get()
+        .then((snapshot) {
+          var docs = snapshot.docs;
+          List<Spot> spots = [];
+          docs.forEach((d) {
+            try {
+              spots.add(Spot.from(d.data()));
+            } catch (e) {
+              print(e);
+            }
+          });
+          return spots;
+        });
+  }
+
+  Future<List<VoiceChat>> listVoiceChat() {
+    print("listVoiceChat");
+    print(geohash);
+    return _firestore
+        .collection(keyName)
+        .doc(geohash)
+        .collection(VoiceChat.keyName)
+        .orderBy("createdAt", descending: true)
+        .limit(10)
+        .get()
+        .then((snapshot) {
+      var docs = snapshot.docs;
+      print(docs.length);
+      List<VoiceChat> vcs = [];
+      docs.forEach((vc) {
+        try {
+          vcs.add(VoiceChat.from(vc.data()));
+        } catch (e) {
+          print(e);
+        }
+      });
+      return vcs;
+    });
+  }
+}
+
+typedef ChatId = String;
+
+class VoiceChat {
+  static final String keyName = "voiceChat";
+
+  final GeoHash geohash;
+  final String title;
+  final String owner;
+  final int maxAtendees;
+  final List<String> members;
+  final Timestamp createdAt;
+
+  // VoiceChat({
+  //   required this.geohash,
+  //   required this.owner,
+  //   required this.maxAtendees,
+  //   required this.members,
+  //   required this.createdAt,
+  // });
+
+  VoiceChat.from(Map<String, dynamic> obj)
+      : this.geohash = obj["geohash"],
+        this.title = obj["title"],
+        this.owner = obj["owner"],
+        this.maxAtendees = obj["maxAtendees"],
+        this.members = obj["members"] = obj["members"].cast<String>(),
+        this.createdAt = obj["createdAt"];
+
+  static Future<ChatId> create(String geohash, Map<String, Object?> data) {
+    return _firestore
+        .collection(Spot.keyName)
+        .doc(geohash)
+        .collection(keyName)
+        .add(data)
+        .then((res) => res.id);
+  }
+
+  static Future<VoiceChat> get(String geohash, ChatId chatId) {
+    return _firestore
+        .collection(Spot.keyName)
+        .doc(geohash)
+        .collection(keyName)
+        .doc(chatId)
+        .get()
+        .then((doc) {
+      var data = doc.data();
+      if (data != null) {
+        try {
+          return VoiceChat.from(data);
+        } catch (e) {
+          print(e);
+          return Future.error(e);
+        }
+      } else {
+        return Future.error("data is null");
+      }
+    });
+  }
+
+  static Future<void> update(
+      String geohash, ChatId chatId, Map<String, Object?> data) {
+    return _firestore
+        .collection(Spot.keyName)
+        .doc(geohash)
+        .collection(keyName)
+        .doc(chatId)
+        .update(data);
+  }
+
+  static void listen(
+      String geohash, ChatId chatId, void Function(VoiceChat) listener) {
+    _firestore
+        .collection("spots")
+        .doc(geohash)
+        .collection("voiceChat")
+        .doc(chatId)
+        .snapshots()
+        .listen((doc) {
+      var data = doc.data();
+      if (data != null) {
+        listener(data as VoiceChat);
+      }
+    });
+  }
+}
+
+class TextChat {
+  static final keyName = "textChat";
+
+  final GeoHash geohash;
+  final String owner;
+  final Timestamp createdAt;
+
+  TextChat({
+    required this.geohash,
+    required this.owner,
+    required this.createdAt,
+  });
+
+  static Future<TextChat> get(String geohash, ChatId chatId) {
+    return _firestore
+        .collection(Spot.keyName)
+        .doc(geohash)
+        .collection(keyName)
+        .doc(chatId)
+        .get()
+        .then((doc) => doc.data() as TextChat);
   }
 }
