@@ -12,6 +12,10 @@ import 'package:geohashlib/geohashlib.dart';
 import '../../api/firestore.dart';
 import './_sliding_up.dart';
 
+GeoPoint latLng2GeoPoint(LatLng latlng) {
+  return GeoPoint(latlng.latitude, latlng.longitude);
+}
+
 class _NearbyPageState extends State<NearbyPage> {
   final GlobalKey<SlidingUpState> _slidingUpStateKey = GlobalKey();
 
@@ -20,7 +24,8 @@ class _NearbyPageState extends State<NearbyPage> {
   bool loop = true;
   bool didMapCreated = false;
   bool didStyleLoaded = false;
-  UserLocation? lastLocation;
+  UserLocation? userLocation;
+  UserLocation? lastSpotLocation;
   // PanelController pController = PanelController();
   Spot? spotFocused;
   late MapboxMapController mController;
@@ -29,10 +34,47 @@ class _NearbyPageState extends State<NearbyPage> {
   List<Marker> _markers = [];
   List<_MarkerState> _markerStates = [];
 
+  void spotUpdate() {
+    if (userLocation != null &&
+        (lastSpotLocation == null ||
+            distanceBetween(latLng2GeoPoint(userLocation!.position),
+                    latLng2GeoPoint(lastSpotLocation!.position)) >
+                100)) {
+      lastSpotLocation = userLocation;
+      print("spotUpdate");
+      var areas = geohashQueryBounds(
+          geoPointForDouble(userLocation!.position.latitude,
+              userLocation!.position.longitude),
+          500);
+      Future.forEach<Map<String, String>>(areas, (area) {
+        return Spot.search(area["start"]!, area["end"]!).then((spots) {
+          var filtered = spots.where((sp) {
+            print(sp);
+            var dist = distanceBetween(
+                geoPointForDouble(sp.lat, sp.lon),
+                geoPointForDouble(userLocation!.position.latitude,
+                    userLocation!.position.longitude));
+            return 500 > dist;
+          }).toList();
+          mController
+              .toScreenLocationBatch(
+                  filtered.map((elm) => LatLng(elm.lat, elm.lon)))
+              .then((value) {
+            for (var i = 0; i < value.length; i++) {
+              Point<double> p =
+                  Point<double>(value[i].x as double, value[i].y as double);
+              _addMarker(filtered[i], p);
+            }
+          });
+        });
+      });
+    }
+  }
+
   void _renderer() {
     if (loop) {
       mController
-          .getMetersPerPixelAtLatitude(this.lastLocation!.position.latitude)
+          .getMetersPerPixelAtLatitude(this.userLocation!.position.latitude)
           .then((unit) {
         return mController.updateCircle(
             userCircle!, CircleOptions(circleRadius: 1000 / unit));
@@ -124,15 +166,11 @@ class _NearbyPageState extends State<NearbyPage> {
   }
 
   void _onUserLocationUpdated(UserLocation location) {
-    lastLocation = location;
-    print(distanceBetween(
-        geoPointForDouble(
-            lastLocation!.position.latitude, lastLocation!.position.longitude),
-        geoPointForDouble(
-            location.position.latitude, location.position.longitude)));
+    // print(distanceBetween(geoPointForDouble(userLocation!.position.latitude, userLocation!.position.longitude), geoPointForDouble(location.position.latitude, location.position.longitude)));
+    spotUpdate();
     if (location.horizontalAccuracy != null &&
         100 > location.horizontalAccuracy!) {
-      lastLocation = location;
+      userLocation = location;
     }
 
     if (location.heading?.trueHeading != null) {
@@ -252,71 +290,7 @@ class _NearbyPageState extends State<NearbyPage> {
                             ),
                           ),
                           onPressed: () {
-                            var areas = geohashQueryBounds(
-                                geoPointForDouble(
-                                    lastLocation!.position.latitude,
-                                    lastLocation!.position.longitude),
-                                500);
-                            Future.forEach<Map<String, String>>(areas, (area) {
-                              // return _firestore
-                              //     .collection("spots")
-                              //     .orderBy('geohash')
-                              //     .startAt([area["start"]])
-                              //     .endAt([area["end"]])
-                              //     .get()
-                              // .then((res) {
-                              //   List<Spot> spots = [];
-                              //   for (var doc in res.docs) {
-                              //     inspect(doc.data());
-                              //     var sp = Spot.fromMap(doc.data());
-                              //     print(sp);
-                              //     var dist = distanceBetween(
-                              //         geoPointForDouble(sp.lat, sp.lon),
-                              //         geoPointForDouble(
-                              //             lastLocation!.position.latitude,
-                              //             lastLocation!
-                              //                 .position.longitude));
-                              //     print(dist);
-                              //     if (500 > dist) {
-                              //       spots.add(sp);
-                              //     }
-                              //   }
-                              //   mController
-                              //       .toScreenLocationBatch(spots.map(
-                              //           (elm) => LatLng(elm.lat, elm.lon)))
-                              //       .then((value) {
-                              //     for (var i = 0; i < value.length; i++) {
-                              //       Point<double> p = Point<double>(
-                              //           value[i].x as double,
-                              //           value[i].y as double);
-                              //       _addMarker(spots[i], p);
-                              //     }
-                              //   });
-                              // });
-                              return Spot.search(area["start"]!, area["end"]!)
-                                  .then((spots) {
-                                var filtered = spots.where((sp) {
-                                  print(sp);
-                                  var dist = distanceBetween(
-                                      geoPointForDouble(sp.lat, sp.lon),
-                                      geoPointForDouble(
-                                          lastLocation!.position.latitude,
-                                          lastLocation!.position.longitude));
-                                  return 500 > dist;
-                                }).toList();
-                                mController
-                                    .toScreenLocationBatch(filtered
-                                        .map((elm) => LatLng(elm.lat, elm.lon)))
-                                    .then((value) {
-                                  for (var i = 0; i < value.length; i++) {
-                                    Point<double> p = Point<double>(
-                                        value[i].x as double,
-                                        value[i].y as double);
-                                    _addMarker(filtered[i], p);
-                                  }
-                                });
-                              });
-                            });
+                            spotUpdate();
                           }),
                     ),
                   ),
@@ -358,7 +332,7 @@ class Marker extends StatefulWidget {
 }
 
 class _MarkerState extends State {
-  final _iconSize = 50.0;
+  final _iconSize = 40.0;
   void Function() tapHandler;
   Point<num> position;
 
@@ -373,17 +347,20 @@ class _MarkerState extends State {
   Widget build(BuildContext ctx) {
     var ratio = Platform.isIOS ? 1.0 : MediaQuery.of(ctx).devicePixelRatio;
     var left = position.x / ratio - _iconSize / 2;
-    var top = position.y / ratio - _iconSize / 2;
+    var top = position.y / ratio - _iconSize;
+    // var left = position.x / ratio;
+    // var top = position.y / ratio;
     return Positioned(
         left: left,
         top: top,
         child: Container(
-          child: CupertinoButton(
-              onPressed: () {
+          child: GestureDetector(
+              onTap: () {
                 this.tapHandler();
               },
               child: Image.asset(
                 'assets/img/location-outline.png',
+                width: _iconSize,
                 height: _iconSize,
               )),
         ));
