@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'friends/routes.dart';
+import 'nearby/routes.dart';
 import 'home/routes.dart';
 import 'profile/routes.dart';
-import 'nearby/routes.dart';
+import 'location/routes.dart';
 import 'fullscreen/shiga_waiting.dart';
 import 'package:ionicons/ionicons.dart';
 import 'error.dart';
@@ -54,11 +54,12 @@ class Frame extends StatelessWidget {
           BottomNavigationBarItem(
               label: "ホーム", icon: Icon(Ionicons.home_outline, size: 24)),
           BottomNavigationBarItem(
-              label: "フレンド", icon: Icon(Ionicons.people_outline, size: 24)),
+              label: "近く",
+              icon: Icon(Ionicons.navigate_circle_outline, size: 24)),
           // BottomNavigationBarItem(
           //     label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
           BottomNavigationBarItem(
-              label: "ご近所", icon: Icon(Ionicons.location_outline, size: 24)),
+              label: "マップ", icon: Icon(Ionicons.location_outline, size: 24)),
           BottomNavigationBarItem(
               label: "プロフィール", icon: Icon(Ionicons.id_card_outline, size: 24))
         ],
@@ -71,9 +72,9 @@ class Frame extends StatelessWidget {
           return HomeRoutes();
           // return TestPage();
         } else if (index == 1) {
-          return FriendsRoutes();
+          return NearByRoutes();
         } else if (index == 2) {
-          return NearbyRoutes();
+          return LocationRoutes();
         } else if (index == 3) {
           return ProfileRoutes();
         } else {

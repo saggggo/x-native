@@ -1,21 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import "./nearby.dart";
-import "./create_voice_chat.dart";
-import "./detail_voice_chat.dart";
+import "../error.dart";
 
-class NearbyRoutes extends StatelessWidget {
+class NearByRoutes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoTabView(routes: <String, WidgetBuilder>{
       "/": (BuildContext ctx) {
-        return NearbyPage();
+        return NearByPage();
       },
-      "/voiceChat/create": (BuildContext ctx) {
-        return CreateVoiceChatForm();
-      },
-      "/voiceChat/detail": (BuildContext ctx) {
-        return DetailVoiceChat();
-      }
     });
   }
 }
