@@ -264,36 +264,47 @@ class _NearbyPageState extends State<NearbyPage> {
                   children: _markers,
                 ),
                 SafeArea(
-                  child: Container(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                      width: deviceWidth * .8,
-                      height: 45,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          color: Color(0xFFFFFFFF),
-                          border: Border.all(color: Color(0xFFEEEEEE)),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF333333),
-                              offset: Offset(3, 3),
-                              blurRadius: 3.0,
-                              spreadRadius: 1.0,
-                            ),
-                          ]),
-                      child: CupertinoButton(
-                          child: Align(
-                            child: Icon(
-                              CupertinoIcons.checkmark,
-                              color: Color(0xFF000000),
-                            ),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            width: deviceWidth * .8,
+                            height: 45,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                color: Color(0xFFFFFFFF),
+                                border: Border.all(color: Color(0xFFEEEEEE)),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFF333333),
+                                    offset: Offset(3, 3),
+                                    blurRadius: 3.0,
+                                    spreadRadius: 1.0,
+                                  ),
+                                ]),
+                            child: CupertinoButton(
+                                child: Align(
+                                  child: Icon(
+                                    CupertinoIcons.checkmark,
+                                    color: Color(0xFF000000),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  spotUpdate();
+                                }),
                           ),
-                          onPressed: () {
-                            spotUpdate();
-                          }),
-                    ),
-                  ),
+                        ),
+                        Container(
+                            width: deviceWidth,
+                            height: 80,
+                            decoration: BoxDecoration(color: Color(0xFF000000)),
+                            child: Row(
+                              children: [Text("hoge")],
+                            ))
+                      ]),
                 ),
                 if (spotFocused != null)
                   SlidingUp(key: _slidingUpStateKey, spot: this.spotFocused!)

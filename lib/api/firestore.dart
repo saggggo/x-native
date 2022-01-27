@@ -124,8 +124,6 @@ class Spot {
   }
 
   Future<List<VoiceChat>> listVoiceChat() {
-    print("listVoiceChat");
-    print(geohash);
     return _firestore
         .collection(keyName)
         .doc(geohash)
