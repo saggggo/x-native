@@ -4,13 +4,28 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'pages/entry.dart';
 import 'pages/login.dart';
 import 'pages/error.dart';
 import 'api/firestore.dart';
+import 'api/firefunction.dart';
 import 'components/loading.dart';
 
+FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
 void main() {
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    Map<String, dynamic> data = message.data;
+
+    print(data);
+  });
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   WidgetsFlutterBinding.ensureInitialized();
   runApp(FirebaseHandler());
 }
@@ -29,6 +44,7 @@ class FirebaseHandler extends StatelessWidget {
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
+          invokeHello();
           return LoginHandler();
         }
 

@@ -14,7 +14,8 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    return Container(
+    return CupertinoApp(
+      home: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage("assets/img/background.jpeg"),
@@ -28,29 +29,53 @@ class Login extends StatelessWidget {
               flex: 3,
               child: Center(
                   child: Text(
-                'Shiga',
-                textDirection: TextDirection.ltr,
+                '',
                 style: TextStyle(
                     fontFamily: 'RockSalt', fontSize: 70, color: Colors.white),
               )),
             ),
             Expanded(
-                flex: 2,
-                child: Center(
-                    child: CupertinoButton.filled(
-                        child: Text(
-                          "Google Login",
-                          textDirection: TextDirection.ltr,
-                          style: TextStyle(fontFamily: 'Sniglet', fontSize: 25),
-                        ),
-                        onPressed: () {
-                          loadingCallback(true);
-                          signInWithGoogle().whenComplete(() {
-                            loadingCallback(false);
-                          });
-                        }))),
+              flex: 2,
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    color: Color(0xFF4285F4),
+                    child: Container(
+                      height: 48,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset(
+                            "assets/img/btn_google_signin_dark_normal.png",
+                            fit: BoxFit.fitHeight,
+                            filterQuality: FilterQuality.high,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "Sign in with Google",
+                              style: TextStyle(
+                                  color: Color(0xFFFFFFFF), fontSize: 22),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    onPressed: () {
+                      loadingCallback(true);
+                      signInWithGoogle().whenComplete(() {
+                        loadingCallback(false);
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
 

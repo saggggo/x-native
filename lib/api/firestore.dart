@@ -1,6 +1,6 @@
 import "dart:developer";
-import 'package:geohashlib/geohashlib.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geohashlib/geohashlib.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -10,6 +10,7 @@ Timestamp now() {
 }
 
 class FireUser {
+  static String keyName = "users";
   final String uid;
   final String email;
   final bool emailVerified;
@@ -35,6 +36,10 @@ class FireUser {
         this.createdAt = obj["createdAt"] as Timestamp,
         this.modifiedAt = obj["modifiedAt"] as Timestamp,
         this.phoneNumber = obj["phoneNumber"] as String?;
+
+  static Future<void> update(String userId, Map<String, dynamic> obj) {
+    return _firestore.collection(FireUser.keyName).doc(userId).update(obj);
+  }
 }
 
 class FireUserProfile {

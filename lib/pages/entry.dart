@@ -1,11 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:ionicons/ionicons.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../api/firestore.dart';
+import 'error.dart';
 import 'nearby/routes.dart';
 import 'home/routes.dart';
 import 'profile/routes.dart';
 import 'location/routes.dart';
 import 'fullscreen/shiga_waiting.dart';
-import 'package:ionicons/ionicons.dart';
-import 'error.dart';
+import "../components/loading.dart";
 import "./testpage.dart";
 
 class Entry extends StatelessWidget {
@@ -29,56 +36,69 @@ class Entry extends StatelessWidget {
 
 class Frame extends StatelessWidget {
   final CupertinoTabController _tabController = CupertinoTabController();
-  int? from;
 
-  Frame() {
-    // _tabController.addListener(() {
-    // int to = _tabController.index;
-    // micボタンが押された場合
-    // if (to == 2) {
-    //   if (this.from != null) {
-    //     _tabController.index = this.from!;
-    //   } else {
-    //     _tabController.index = 0;
-    //   }
-    // } else {
-    //   this.from = to;
-    // }
-    // });
+  Future<void> _refreshPushTokenHandler(String uid) {
+    Future<void> _saveTokenToDatabase(String? _token) {
+      return FireUser.update(uid, {
+        'tokens': FieldValue.arrayUnion([_token]),
+      });
+    }
+
+    return FirebaseMessaging.instance.getToken().then((token) {
+      return _saveTokenToDatabase(token);
+    }).then((value) =>
+        FirebaseMessaging.instance.onTokenRefresh.listen(_saveTokenToDatabase));
   }
 
   Widget build(BuildContext ctx) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              label: "ホーム", icon: Icon(Ionicons.home_outline, size: 24)),
-          BottomNavigationBarItem(
-              label: "近く",
-              icon: Icon(Ionicons.navigate_circle_outline, size: 24)),
-          // BottomNavigationBarItem(
-          //     label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
-          BottomNavigationBarItem(
-              label: "マップ", icon: Icon(Ionicons.location_outline, size: 24)),
-          BottomNavigationBarItem(
-              label: "プロフィール", icon: Icon(Ionicons.id_card_outline, size: 24))
-        ],
-        iconSize: 25,
-        currentIndex: 2,
-      ),
-      controller: _tabController,
-      tabBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          return HomeRoutes();
-          // return TestPage();
-        } else if (index == 1) {
-          return NearByRoutes();
-        } else if (index == 2) {
-          return LocationRoutes();
-        } else if (index == 3) {
-          return ProfileRoutes();
+    var user = ctx.read<FireUser>();
+
+    return FutureBuilder(
+      future: this._refreshPushTokenHandler(user.uid),
+      builder: (BuildContext ctx, AsyncSnapshot snapshot) {
+        print("state: " + snapshot.connectionState.toString());
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Loading();
+        } else if (snapshot.connectionState == ConnectionState.done) {
+          return CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                    label: "ホーム", icon: Icon(Ionicons.home_outline, size: 24)),
+                BottomNavigationBarItem(
+                    label: "近く",
+                    icon: Icon(Ionicons.navigate_circle_outline, size: 24)),
+                // BottomNavigationBarItem(
+                //     label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
+                BottomNavigationBarItem(
+                    label: "マップ",
+                    icon: Icon(Ionicons.location_outline, size: 24)),
+                BottomNavigationBarItem(
+                    label: "プロフィール",
+                    icon: Icon(Ionicons.id_card_outline, size: 24))
+              ],
+              iconSize: 25,
+              currentIndex: 2,
+            ),
+            controller: _tabController,
+            tabBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return HomeRoutes();
+                // return TestPage();
+              } else if (index == 1) {
+                return NearByRoutes();
+              } else if (index == 2) {
+                return LocationRoutes();
+              } else if (index == 3) {
+                return ProfileRoutes();
+              } else {
+                return Error("error, unintended page");
+              }
+            },
+          );
         } else {
-          return Error("error, unintended page");
+          // TODO
+          return Loading();
         }
       },
     );
