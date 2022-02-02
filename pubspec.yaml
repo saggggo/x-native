@@ -33,6 +33,7 @@ dependencies:
     path: ./packages/geohashlib
   flutter_webrtc: ^0.8.1
   firebase_messaging: ^11.2.6
+  firebase_database: ^9.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

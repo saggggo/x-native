@@ -13,11 +13,37 @@ import 'profile/routes.dart';
 import 'location/routes.dart';
 import 'fullscreen/shiga_waiting.dart';
 import "../components/loading.dart";
+import "../utils/presence_manager.dart";
 import "./testpage.dart";
 
+FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId}");
+}
+
 class Entry extends StatelessWidget {
+  bool initialized = false;
+
+  void _init(BuildContext ctx) {
+    var user = ctx.read<FireUser>();
+
+    if (!initialized) {
+      PresenceManager(user.uid);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        Map<String, dynamic> data = message.data;
+
+        print(data);
+      });
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+      this.initialized = true;
+    }
+  }
+
   @override
   build(BuildContext ctx) {
+    _init(ctx);
     return CupertinoApp(
       theme: CupertinoThemeData(
           brightness: Brightness.dark, primaryColor: Color(0xFFFFFFFF)),
