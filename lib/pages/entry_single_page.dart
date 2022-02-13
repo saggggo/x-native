@@ -11,10 +11,9 @@ import 'nearby/routes.dart';
 import 'home/routes.dart';
 import 'profile/routes.dart';
 import 'location/routes.dart';
-import 'fullscreen/full_screen_test.dart';
 import "../components/loading.dart";
 import "../utils/presence_manager.dart";
-import "./testpage.dart";
+import "./nearby/nearby.dart";
 
 FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -47,14 +46,7 @@ class Entry extends StatelessWidget {
     return CupertinoApp(
       theme: CupertinoThemeData(
           brightness: Brightness.dark, primaryColor: Color(0xFFFFFFFF)),
-      routes: <String, WidgetBuilder>{
-        "/": (BuildContext ctx) {
-          return Frame();
-        },
-        "/waiting": (BuildContext ctx) {
-          return FullScreenTest();
-        }
-      },
+      home: Frame(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -86,42 +78,7 @@ class Frame extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Loading();
         } else if (snapshot.connectionState == ConnectionState.done) {
-          return CupertinoTabScaffold(
-            tabBar: CupertinoTabBar(
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                    label: "ホーム", icon: Icon(Ionicons.home_outline, size: 24)),
-                BottomNavigationBarItem(
-                    label: "近く",
-                    icon: Icon(Ionicons.navigate_circle_outline, size: 24)),
-                // BottomNavigationBarItem(
-                //     label: "録音", icon: Icon(Ionicons.mic_outline, size: 24)),
-                BottomNavigationBarItem(
-                    label: "マップ",
-                    icon: Icon(Ionicons.location_outline, size: 24)),
-                BottomNavigationBarItem(
-                    label: "プロフィール",
-                    icon: Icon(Ionicons.id_card_outline, size: 24))
-              ],
-              iconSize: 25,
-              currentIndex: 2,
-            ),
-            controller: _tabController,
-            tabBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return HomeRoutes();
-                // return TestPage();
-              } else if (index == 1) {
-                return NearByRoutes();
-              } else if (index == 2) {
-                return LocationRoutes();
-              } else if (index == 3) {
-                return ProfileRoutes();
-              } else {
-                return Error("error, unintended page");
-              }
-            },
-          );
+          return NearByPage();
         } else {
           // TODO
           return Loading();
