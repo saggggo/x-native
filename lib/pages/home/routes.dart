@@ -1,17 +1,28 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'home.dart';
 import 'useradd.dart';
 
 class HomeRoutes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabView(defaultTitle: "ss", routes: <String, WidgetBuilder>{
-      "/": (BuildContext ctx) {
-        return HomePage();
+    return Navigator(
+      initialRoute: "/",
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) {
+            late Widget ret;
+            switch (settings.name) {
+              case "/":
+                ret = HomePage();
+                break;
+              case "/useradd":
+                ret = UserAddPage();
+                break;
+            }
+            return ret;
+          },
+        );
       },
-      "/useradd": (BuildContext ctx) {
-        return UserAddPage();
-      }
-    });
+    );
   }
 }

@@ -1,22 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
-
-class NearByPageNavigationContents extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // CupertinoSwitch(
-        //   value: true,
-        //   onChanged: (tf) {},
-        // )
-      ],
-    );
-  }
-}
 
 class NearByPage extends StatelessWidget {
   @override
@@ -24,12 +8,7 @@ class NearByPage extends StatelessWidget {
     Permission.location.status.then((p) {
       print(p);
     });
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        trailing: NearByPageNavigationContents(),
-      ),
-      child: SafeArea(child: _NearByPageContents()),
-    );
+    return SafeArea(child: _NearByPageContents());
   }
 }
 
@@ -43,24 +22,24 @@ class _NearByPageContentsState extends State<_NearByPageContents>
     with SingleTickerProviderStateMixin {
   _Progress progress = _Progress.initialize;
 
-  final DecorationTween decorationTween = DecorationTween(
-    begin: BoxDecoration(
-      color: const Color(0xFFFFFFFF),
-      border: Border.all(width: 0),
-      borderRadius: BorderRadius.circular(100.0),
-    ),
-    end: BoxDecoration(
-      color: const Color(0xFFFFFFFF),
-      border: Border.all(width: 30, style: BorderStyle.solid),
-      borderRadius: BorderRadius.circular(100.0),
-      // No shadow.
-    ),
-  );
+  // final DecorationTween decorationTween = DecorationTween(
+  //   begin: BoxDecoration(
+  //     color: const Color(0xFFFFFFFF),
+  //     border: Border.all(width: 0),
+  //     borderRadius: BorderRadius.circular(100.0),
+  //   ),
+  //   end: BoxDecoration(
+  //     color: const Color(0xFFFFFFFF),
+  //     border: Border.all(width: 30, style: BorderStyle.solid),
+  //     borderRadius: BorderRadius.circular(100.0),
+  //     // No shadow.
+  //   ),
+  // );
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 1),
-  )..repeat(reverse: true);
+  // late final AnimationController _controller = AnimationController(
+  //   vsync: this,
+  //   duration: const Duration(seconds: 1),
+  // )..repeat(reverse: true);
 
   @override
   Widget build(BuildContext ctx) {
@@ -70,15 +49,12 @@ class _NearByPageContentsState extends State<_NearByPageContents>
       children: [
         Expanded(
           child: Center(
-            child: DecoratedBoxTransition(
-              decoration: decorationTween.animate(_controller),
-              child: Container(
-                height: 120,
-                width: 120,
-                decoration: BoxDecoration(
-                  color: Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.circular(100),
-                ),
+            child: Container(
+              height: 120,
+              width: 120,
+              decoration: BoxDecoration(
+                color: Color(0xFFFFFFFF),
+                borderRadius: BorderRadius.circular(100),
               ),
             ),
           ),
@@ -122,11 +98,12 @@ class _NearByPageContentsState extends State<_NearByPageContents>
                       border: Border.all(color: Color(0xFF222222), width: 3),
                       borderRadius: BorderRadius.circular(100.0),
                     ),
-                    child: Center(child: Text("接続")),
+                    child: Center(child: Text("スピーカー")),
                   ),
                 ),
               GestureDetector(
                 onTap: () async {
+                  print(progress);
                   Position position = await Geolocator.getCurrentPosition(
                       desiredAccuracy: LocationAccuracy.high);
 

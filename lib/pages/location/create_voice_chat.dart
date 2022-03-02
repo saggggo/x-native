@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../api/firestore.dart';
@@ -26,16 +25,16 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
   Widget build(BuildContext context) {
     var user = context.read<FireUser>();
     final spot = ModalRoute.of(context)!.settings.arguments as Spot;
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        leading: TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("キャンセル")),
-        // middle: Text("chat"),
-      ),
-      child: SafeArea(
+    return Scaffold(
+      // navigationBar: CupertinoNavigationBar(
+      //   leading: TextButton(
+      //       onPressed: () {
+      //         Navigator.of(context).pop();
+      //       },
+      //       child: Text("キャンセル")),
+      //   // middle: Text("chat"),
+      // ),
+      body: SafeArea(
         child: (loading)
             ? Loading()
             : Form(
@@ -54,7 +53,7 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                           Container(
                             margin: EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 20),
-                            child: CupertinoTextFormFieldRow(
+                            child: TextFormField(
                               onChanged: (value) {
                                 setState(() {
                                   print(value);
@@ -62,10 +61,10 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                                 });
                               },
                               maxLength: 20,
-                              decoration: BoxDecoration(
-                                  color: Color(0xFF222222),
-                                  borderRadius: BorderRadius.circular(5)),
-                              placeholder: "タイトル",
+                              // decoration: BoxDecoration(
+                              //     color: Color(0xFF222222),
+                              //     borderRadius: BorderRadius.circular(5)),
+                              // placeholder: "タイトル",
                               validator: (str) {
                                 if (str == null || str.isEmpty) {
                                   return "タイトルを指定してください";
@@ -84,7 +83,7 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                                   "最大人数",
                                   style: TextStyle(color: Color(0xFFFFFFFF)),
                                 ),
-                                CupertinoSlider(
+                                Slider(
                                   value: sliderValue,
                                   onChanged: (val) {
                                     print(val);
@@ -149,15 +148,15 @@ class _CreateVoiceChatFormState extends State<CreateVoiceChatForm> {
                                 // );
                               }, onError: (err) {
                                 print(err);
-                                showCupertinoDialog(
+                                showDialog(
                                   context: context,
                                   builder: (context) {
-                                    return CupertinoAlertDialog(
+                                    return AlertDialog(
                                       title: Text("エラー"),
                                       content:
                                           Text("不明なエラーが発生しました。再度やり直してください。"),
                                       actions: [
-                                        CupertinoDialogAction(
+                                        MaterialButton(
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },

@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../api/firestore.dart';
@@ -14,8 +14,8 @@ class ProfilePageNavigationContents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      child: Icon(CupertinoIcons.checkmark),
+    return MaterialButton(
+      child: Icon(Icons.check_box),
       onPressed: () {
         // if (editingStateChanged != null) {
         //   editingStateChanged!(false);
@@ -52,11 +52,11 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
     var user = context.read<FireUser>();
     var profilePromise = profileRef.doc(user.uid).get();
 
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        trailing: ProfilePageNavigationContents(),
-      ),
-      child: SafeArea(
+    return Scaffold(
+      // navigationBar: CupertinoNavigationBar(
+      //   trailing: ProfilePageNavigationContents(),
+      // ),
+      body: SafeArea(
         maintainBottomViewPadding: true,
         child: FutureBuilder<DocumentSnapshot>(
           future: profilePromise,
@@ -113,8 +113,8 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
                                   child: Text("ニックネーム"),
                                 ),
                                 Expanded(
-                                  child: CupertinoTextField(
-                                    placeholder: profile.displayName,
+                                  child: TextField(
+                                    // placeholder: profile.displayName,
                                     onChanged: (value) {
                                       print(value);
                                     },
@@ -135,7 +135,7 @@ class _ProfileEditingPageState extends State<ProfileEditingPage> {
                                   )
                                 ]),
                                 Expanded(
-                                  child: CupertinoTextField(),
+                                  child: TextField(),
                                 ),
                               ],
                             ),

@@ -1,19 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../api/firestore.dart';
 import 'error.dart';
-import 'nearby/routes.dart';
-import 'home/routes.dart';
-import 'profile/routes.dart';
-import 'location/routes.dart';
 import "../components/loading.dart";
 import "../utils/presence_manager.dart";
 import "./nearby/nearby.dart";
+import "./theme.dart";
 
 FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -43,9 +40,8 @@ class Entry extends StatelessWidget {
   @override
   build(BuildContext ctx) {
     _init(ctx);
-    return CupertinoApp(
-      theme: CupertinoThemeData(
-          brightness: Brightness.dark, primaryColor: Color(0xFFFFFFFF)),
+    return MaterialApp(
+      theme: myTheme,
       home: Frame(),
       debugShowCheckedModeBanner: false,
     );
@@ -53,8 +49,6 @@ class Entry extends StatelessWidget {
 }
 
 class Frame extends StatelessWidget {
-  final CupertinoTabController _tabController = CupertinoTabController();
-
   Future<void> _refreshPushTokenHandler(String uid) {
     Future<void> _saveTokenToDatabase(String? _token) {
       return FireUser.update(uid, {
@@ -78,7 +72,7 @@ class Frame extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Loading();
         } else if (snapshot.connectionState == ConnectionState.done) {
-          return NearByPage();
+          return Scaffold(body: NearByPage());
         } else {
           // TODO
           return Loading();

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ionicons/ionicons.dart';
@@ -11,14 +11,14 @@ class ProfilePageNavigationContents extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        CupertinoButton(
+        MaterialButton(
           child:
               Icon(Ionicons.pencil_outline, size: 22, color: Color(0xff999999)),
           onPressed: () {
             Navigator.pushNamed(context, '/editing');
           },
         ),
-        CupertinoButton(
+        MaterialButton(
           child: Icon(Ionicons.settings_outline,
               size: 22, color: Color(0xff999999)),
           onPressed: () {
@@ -47,11 +47,11 @@ class _ProfilePageState extends State<ProfilePage> {
     var user = context.read<FireUser>();
     var profilePromise = profileRef.doc(user.uid).get();
 
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        trailing: ProfilePageNavigationContents(),
-      ),
-      child: SafeArea(
+    return Scaffold(
+      // navigationBar: CupertinoNavigationBar(
+      //   trailing: ProfilePageNavigationContents(),
+      // ),
+      body: SafeArea(
         maintainBottomViewPadding: true,
         child: FutureBuilder<DocumentSnapshot>(
           future: profilePromise,

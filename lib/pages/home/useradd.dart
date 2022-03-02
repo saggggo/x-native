@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -65,9 +64,9 @@ class _UserAddPageState extends State<UserAddPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text("友達を追加")),
-      child: SafeArea(
+    return Scaffold(
+      // navigationBar: CupertinoNavigationBar(middle: Text("友達を追加")),
+      body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -77,7 +76,7 @@ class _UserAddPageState extends State<UserAddPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CupertinoButton(
+                    MaterialButton(
                         child: Text(
                           "QRで追加",
                           textAlign: TextAlign.center,
@@ -94,7 +93,7 @@ class _UserAddPageState extends State<UserAddPage> {
                                 });
                               }
                             : null),
-                    CupertinoButton(
+                    MaterialButton(
                         child: Text(
                           "IDで追加",
                           textAlign: TextAlign.center,
@@ -148,21 +147,21 @@ class _UserAddPageState extends State<UserAddPage> {
                                 isQRScanMode = !isQRScanMode;
                               });
                             } else if (p.isPermanentlyDenied) {
-                              showCupertinoDialog(
+                              showDialog(
                                   context: context,
                                   builder: (BuildContext ctx) {
-                                    return CupertinoAlertDialog(
+                                    return AlertDialog(
                                         // title: Text(),
                                         content:
                                             Text("設定画面にてカメラのアクセスを許可してください"),
                                         actions: <Widget>[
-                                          CupertinoDialogAction(
+                                          MaterialButton(
                                             child: Text("OK"),
                                             onPressed: () {
                                               openAppSettings();
                                               return Navigator.of(ctx).pop();
                                             },
-                                            isDefaultAction: true,
+                                            // isDefaultAction: true,
                                           )
                                         ]);
                                   });
@@ -178,8 +177,8 @@ class _UserAddPageState extends State<UserAddPage> {
                     children: [
                       Container(
                         padding: EdgeInsets.fromLTRB(30, 0, 30, 30),
-                        child: CupertinoTextField(
-                          placeholder: 'IDを入力',
+                        child: TextField(
+                          // placeholder: 'IDを入力',
                           onSubmitted: (text) {
                             print(text);
                             setState(() {
@@ -251,10 +250,10 @@ class _UserAddPageState extends State<UserAddPage> {
   }
 
   void _showAddUserDialog() {
-    showCupertinoDialog(
+    showDialog(
         context: context,
         builder: (ctx) {
-          return CupertinoAlertDialog(
+          return AlertDialog(
             content: Text("hoge"),
           );
         });

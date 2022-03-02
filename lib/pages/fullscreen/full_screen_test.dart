@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class FullScreenTest extends StatelessWidget {
   @override

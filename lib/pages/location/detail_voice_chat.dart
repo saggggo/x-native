@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../api/firestore.dart';
@@ -22,11 +21,8 @@ class _DetailVoiceChatFormState extends State<DetailVoiceChat> {
   Widget build(BuildContext context) {
     var user = context.read<FireUser>();
     final voiceChat = ModalRoute.of(context)!.settings.arguments as VoiceChat;
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-          // middle: Text("chat"),
-          ),
-      child: SafeArea(
+    return Scaffold(
+      body: SafeArea(
           child: (loading)
               ? Loading()
               : Column(

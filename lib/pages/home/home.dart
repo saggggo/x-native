@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 class HomePageNavigationContents extends StatelessWidget {
@@ -7,7 +7,7 @@ class HomePageNavigationContents extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        CupertinoButton(
+        MaterialButton(
           child: Icon(Ionicons.person_add_outline,
               color: Color(0xff999999), size: 22),
           onPressed: () {
@@ -22,13 +22,9 @@ class HomePageNavigationContents extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          trailing: HomePageNavigationContents(),
-        ),
-        child: Center(
-          child:
-              Column(mainAxisAlignment: MainAxisAlignment.center, children: []),
-        ));
+    return Scaffold(
+        body: Center(
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: []),
+    ));
   }
 }

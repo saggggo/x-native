@@ -1,17 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 Future errorDialog(BuildContext context, String title, String message) {
-  return showCupertinoDialog(
+  return showDialog(
       context: context,
       builder: (BuildContext ctx) {
-        return CupertinoAlertDialog(
+        return AlertDialog(
             title: Text(title),
             content: Text(message),
             actions: <Widget>[
-              CupertinoDialogAction(
+              MaterialButton(
                 child: Text("OK"),
                 onPressed: () => Navigator.of(ctx).pop(),
-                isDefaultAction: true,
+                // isDefaultAction: true,
               )
             ]);
       });

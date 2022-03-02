@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:geohashlib/geohashlib.dart';
 import '../../api/firestore.dart';
@@ -221,8 +221,8 @@ class _LocationPageState extends State<LocationPage> {
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
 
-    return CupertinoPageScaffold(
-      child: SafeArea(
+    return Scaffold(
+      body: SafeArea(
         top: false,
         child: Center(
           child: Container(
@@ -285,10 +285,10 @@ class _LocationPageState extends State<LocationPage> {
                                     spreadRadius: 1.0,
                                   ),
                                 ]),
-                            child: CupertinoButton(
+                            child: MaterialButton(
                                 child: Align(
                                   child: Icon(
-                                    CupertinoIcons.checkmark,
+                                    Icons.check,
                                     color: Color(0xFF000000),
                                   ),
                                 ),
@@ -297,13 +297,6 @@ class _LocationPageState extends State<LocationPage> {
                                 }),
                           ),
                         ),
-                        Container(
-                            width: deviceWidth,
-                            height: 80,
-                            decoration: BoxDecoration(color: Color(0xFF000000)),
-                            child: Row(
-                              children: [Text("hoge")],
-                            ))
                       ]),
                 ),
                 if (spotFocused != null)
