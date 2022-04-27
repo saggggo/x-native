@@ -47,3 +47,5 @@ app.*.map.json
 
 *.g.dart
 *.orig
+google-services.json
+GoogleService-Info.plist
