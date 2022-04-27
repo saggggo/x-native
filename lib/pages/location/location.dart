@@ -239,8 +239,7 @@ class _LocationPageState extends State<LocationPage> {
                   myLocationEnabled: true,
                   myLocationTrackingMode: _myLocationTrackingMode,
                   // trackCameraPosition: true,
-                  accessToken:
-                      "***REMOVED***",
+                  accessToken: "",
                   onMapCreated: _onMapCreated,
                   onMapClick: _onMapClick,
                   onStyleLoadedCallback: _onStyleLoadedCallback,

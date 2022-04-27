@@ -64,7 +64,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MGLMapboxAccessToken</key>
-	<string>***REMOVED***</string>
+	<string></string>
 	<key>NSCameraUsageDescription</key>
 	<string>QRコードを読み込むためにカメラにアクセスします</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
