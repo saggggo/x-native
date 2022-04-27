@@ -1,6 +1,9 @@
+import 'dart:async';
+import "dart:math";
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shiga_native/components/animation/ripples_animation.dart';
 
 class NearByPage extends StatelessWidget {
   @override
@@ -16,30 +19,89 @@ class _NearByPageContents extends StatefulWidget {
   State<StatefulWidget> createState() => _NearByPageContentsState();
 }
 
+// class SequentialAnimationController extends AnimationController {
+//   SequentialAnimationController({
+//     required int steps,
+//     double? value,
+//     Duration? duration,
+//     Duration? reverseDuration,
+//     String? debugLabel,
+//     double lowerBound = 0.0,
+//     double upperBound = 1.0,
+//     AnimationBehavior animationBehavior = AnimationBehavior.normal,
+//     required TickerProvider vsync,
+//   }) : super(
+//             value: value,
+//             duration: duration,
+//             reverseDuration: reverseDuration,
+//             debugLabel: debugLabel,
+//             lowerBound: lowerBound,
+//             animationBehavior: animationBehavior,
+//             vsync: vsync) {
+//     if (steps > 10 || 0 > steps) {
+//       throw new Exception();
+//     }
+//     this.steps = steps - 1;
+//   }
+//   late int steps;
+//   int _step = 0;
+
+//   int get step => _step;
+
+//   TickerFuture repeat(
+//       {double? min, double? max, bool reverse = false, Duration? period}) {
+//     super.addStatusListener((status) {
+//       if (AnimationStatus.completed == status) {
+//         if (this.steps == this.step) {
+//           super.repeat();
+//         } else if (this.steps > this.step) {
+//           this._step++;
+//           super.reset();
+//           super.repeat();
+//         }
+//       }
+//     });
+//     return super.repeat(min: min, max: max, reverse: reverse, period: period);
+//   }
+
+//   void next() {
+//     if (steps > step) {
+//       super.reset();
+//       _step++;
+//     }
+//   }
+
+//   void before() {
+//     if (_step > 0) {
+//       super.reset();
+//       _step--;
+//     }
+//   }
+
+//   void reset() {
+//     super.reset();
+//     _step = 0;
+//   }
+// }
+
 enum _Progress { initialize, waiting, connected }
 
-class _NearByPageContentsState extends State<_NearByPageContents>
-    with SingleTickerProviderStateMixin {
+class _NearByPageContentsState extends State<_NearByPageContents> {
+  GlobalKey<RippplesAnimationState> key = GlobalKey();
+
+  @override
+  void initState() {
+    print("initState");
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    print("dispose");
+  }
+
   _Progress progress = _Progress.initialize;
-
-  // final DecorationTween decorationTween = DecorationTween(
-  //   begin: BoxDecoration(
-  //     color: const Color(0xFFFFFFFF),
-  //     border: Border.all(width: 0),
-  //     borderRadius: BorderRadius.circular(100.0),
-  //   ),
-  //   end: BoxDecoration(
-  //     color: const Color(0xFFFFFFFF),
-  //     border: Border.all(width: 30, style: BorderStyle.solid),
-  //     borderRadius: BorderRadius.circular(100.0),
-  //     // No shadow.
-  //   ),
-  // );
-
-  // late final AnimationController _controller = AnimationController(
-  //   vsync: this,
-  //   duration: const Duration(seconds: 1),
-  // )..repeat(reverse: true);
 
   @override
   Widget build(BuildContext ctx) {
@@ -48,16 +110,23 @@ class _NearByPageContentsState extends State<_NearByPageContents>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Center(
-            child: Container(
-              height: 120,
-              width: 120,
-              decoration: BoxDecoration(
-                color: Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(100),
-              ),
+          child: Stack(children: [
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: RipplesAnimation(key: key),
             ),
-          ),
+            // Center(
+            //   child: Container(
+            //     height: 120,
+            //     width: 120,
+            //     decoration: BoxDecoration(
+            //       color: Color(0xFFFFFFFF),
+            //       borderRadius: BorderRadius.circular(100),
+            //     ),
+            //   ),
+            // ),
+          ]),
         ),
         Container(
           height: 60,
@@ -104,14 +173,15 @@ class _NearByPageContentsState extends State<_NearByPageContents>
               GestureDetector(
                 onTap: () async {
                   print(progress);
-                  Position position = await Geolocator.getCurrentPosition(
-                      desiredAccuracy: LocationAccuracy.high);
 
                   setState(() {
                     if (progress == _Progress.initialize) {
                       progress = _Progress.waiting;
+                      key.currentState!.forward();
                     } else {
                       progress = _Progress.initialize;
+                      key.currentState!.stop();
+                      key.currentState!.reset();
                     }
                   });
                 },
